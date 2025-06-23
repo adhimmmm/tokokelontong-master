@@ -11,7 +11,6 @@
                 <Label text="Manajemen Supplier" style="-fx-text-fill: white; -fx-font-size: 24px; -fx-font-weight: bold;" />
             </HBox>
 
-            <!-- Tambahan fitur pencarian -->
             <HBox spacing="10" style="-fx-padding: 0 20 10 20;">
                 <Label text="Cari Supplier:" />
                 <TextField fx:id="searchField" promptText="Masukkan nama atau ID supplier" prefWidth="300" />
@@ -50,8 +49,6 @@
                 <Label text="No. Telepon:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
                 <TextField fx:id="noTeleponField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
 
-                <Label text="Nama Barang:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-                <TextField fx:id="namaBarangField" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
             </GridPane>
         </VBox>
     </center>

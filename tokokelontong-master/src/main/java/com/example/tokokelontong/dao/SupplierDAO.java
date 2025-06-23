@@ -9,7 +9,38 @@ public class SupplierDAO {
 
     public static List<Supplier> getAllSuppliers() {
         List<Supplier> list = new ArrayList<>();
-        String sql = "SELECT * FROM SUPLIER ORDER BY ID_SUPLIER";
+        // Mengubah query untuk LEFT JOIN dengan tabel BARANG
+        // Mengambil salah satu NAMA_BARANG dari BARANG yang disuplai supplier ini (misal yang pertama secara alfabetis)
+        String sql = """
+            SELECT
+                s.ID_SUPLIER,
+                s.NAMA_SUPLIER,
+                s.ALAMAT,
+                s.NO_TELEPON,
+                (SELECT MIN(b.NAMA_BARANG) FROM BARANG b WHERE b.SUPLIER_ID_SUPLIER = s.ID_SUPLIER) AS NAMA_BARANG_DISPLAY
+            FROM
+                SUPLIER s
+            ORDER BY s.ID_SUPLIER
+        """;
+        // Pilihan lain jika tidak ingin subquery di SELECT:
+        /*
+        String sql = """
+            SELECT
+                s.ID_SUPLIER,
+                s.NAMA_SUPLIER,
+                s.ALAMAT,
+                s.NO_TELEPON,
+                MIN(b.NAMA_BARANG) AS NAMA_BARANG_DISPLAY -- Menggunakan MIN dengan GROUP BY
+            FROM
+                SUPLIER s
+            LEFT JOIN
+                BARANG b ON b.SUPLIER_ID_SUPLIER = s.ID_SUPLIER
+            GROUP BY
+                s.ID_SUPLIER, s.NAMA_SUPLIER, s.ALAMAT, s.NO_TELEPON -- Harus ada semua kolom non-agregat di SELECT
+            ORDER BY s.ID_SUPLIER
+        """;
+        */
+
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -21,7 +52,7 @@ public class SupplierDAO {
                         rs.getString("NAMA_SUPLIER"),
                         rs.getString("ALAMAT"),
                         rs.getString("NO_TELEPON"),
-                        rs.getString("NAMA_BARANG")
+                        rs.getString("NAMA_BARANG_DISPLAY") // Mengambil kolom hasil JOIN/subquery
                 ));
             }
         } catch (SQLException e) {
@@ -30,7 +61,30 @@ public class SupplierDAO {
         return list;
     }
 
+    public static Optional<Supplier> getSupplierById(String idSupplier) throws SQLException {
+        // Query ini tidak perlu diganti untuk fitur ini karena hanya mengambil 1 supplier
+        String sql = "SELECT ID_SUPLIER, NAMA_SUPLIER, ALAMAT, NO_TELEPON, NAMA_BARANG FROM SUPLIER WHERE ID_SUPLIER = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, idSupplier);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(new Supplier(
+                            rs.getString("ID_SUPLIER"),
+                            rs.getString("NAMA_SUPLIER"),
+                            rs.getString("ALAMAT"),
+                            rs.getString("NO_TELEPON"),
+                            rs.getString("NAMA_BARANG") // Mengambil dari kolom NAMA_BARANG di tabel SUPLIER
+                    ));
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+
     public static void insertSupplier(Supplier s) throws SQLException {
+        // Karena input Nama Barang dihapus, kita akan mengirim null atau string kosong untuk kolom NAMA_BARANG di DB
         String sql = "INSERT INTO SUPLIER (NAMA_SUPLIER, ALAMAT, NO_TELEPON, NAMA_BARANG) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = DBUtil.getConnection();
@@ -38,13 +92,16 @@ public class SupplierDAO {
             stmt.setString(1, s.getNamaSupplier());
             stmt.setString(2, s.getAlamat());
             stmt.setString(3, s.getNoTelepon());
-            stmt.setString(4, s.getNamaBarang());
+            stmt.setString(4, null); // Mengirim NULL karena tidak ada input dari form
             stmt.executeUpdate();
         }
     }
 
 
     public static void updateSupplier(Supplier s) throws SQLException {
+        // Karena input Nama Barang dihapus, kita akan mengupdate dengan nilai null atau mempertahankan nilai lama
+        // Dalam kasus ini, kita akan mengupdate dengan null, kecuali jika Anda ingin mempertahankan nilai lama
+        // Jika ingin mempertahankan nilai lama, Anda harus mengambil nilai s.getNamaBarang() dari selectedSupplier
         String sql = "UPDATE SUPLIER SET NAMA_SUPLIER=?, ALAMAT=?, NO_TELEPON=?, NAMA_BARANG=? WHERE ID_SUPLIER=?";
 
         try (Connection conn = DBUtil.getConnection();
@@ -52,24 +109,21 @@ public class SupplierDAO {
             stmt.setString(1, s.getNamaSupplier());
             stmt.setString(2, s.getAlamat());
             stmt.setString(3, s.getNoTelepon());
-            stmt.setString(4, s.getNamaBarang());
+            stmt.setString(4, null); // Mengirim NULL karena tidak ada input dari form ini
             stmt.setString(5, s.getIdSupplier());
             stmt.executeUpdate();
         }
     }
 
 
-    // --- METODE deleteSupplier() YANG DIPERBAIKI DENGAN CASCADING DELETE ---
-    // Metode ini akan menghapus data dari tabel anak terdalam terlebih dahulu.
+    // --- METODE deleteSupplier() ---
+    // (Tidak ada perubahan pada metode deleteSupplier ini)
     public static void deleteSupplier(String idSupplier) throws SQLException {
         Connection conn = null;
         try {
             conn = DBUtil.getConnection();
-            conn.setAutoCommit(false); // Mulai transaksi
+            conn.setAutoCommit(false);
 
-            // Urutan penghapusan harus dari anak paling dalam ke induk:
-
-            // 1. Hapus DETAIL_PEMBELIAN yang terkait dengan PEMBELIAN dari supplier ini
             String sqlDeleteDetailPembelianByPembelian = """
                 DELETE FROM DETAIL_PEMBELIAN
                 WHERE ID_PEMBELIAN IN (SELECT ID_PEMBELIAN FROM PEMBELIAN WHERE ID_SUPLIER = ?)
@@ -79,7 +133,6 @@ public class SupplierDAO {
                 pstmt.executeUpdate();
             }
 
-            // 2. Hapus DETAIL_TRANSAKSI yang terkait dengan TRANSAKSI dari supplier ini
             String sqlDeleteDetailTransaksiByTransaksi = """
                 DELETE FROM DETAIL_TRANSAKSI
                 WHERE TRANSAKSI_ID_TRANSAKSI IN (SELECT ID_TRANSAKSI FROM TRANSAKSI WHERE ID_SUPLIER = ?)
@@ -89,7 +142,6 @@ public class SupplierDAO {
                 pstmt.executeUpdate();
             }
 
-            // 3. Hapus PEMBAYARAN yang terkait dengan TRANSAKSI dari supplier ini
             String sqlDeletePembayaranByTransaksi = """
                 DELETE FROM PEMBAYARAN
                 WHERE TRANSAKSI_ID_TRANSAKSI IN (SELECT ID_TRANSAKSI FROM TRANSAKSI WHERE ID_SUPLIER = ?)
@@ -99,7 +151,6 @@ public class SupplierDAO {
                 pstmt.executeUpdate();
             }
 
-            // 4. Hapus STRUK yang terkait dengan TRANSAKSI dari supplier ini (BARU DITAMBAHKAN)
             String sqlDeleteStrukByTransaksi = """
                 DELETE FROM STRUK
                 WHERE ID_TRANSAKSI IN (SELECT ID_TRANSAKSI FROM TRANSAKSI WHERE ID_SUPLIER = ?)
@@ -109,55 +160,49 @@ public class SupplierDAO {
                 pstmt.executeUpdate();
             }
 
-            // 5. Hapus BARANG yang disuplai oleh supplier ini
             String sqlDeleteBarang = "DELETE FROM BARANG WHERE SUPLIER_ID_SUPLIER = ?";
             try (PreparedStatement pstmt = conn.prepareStatement(sqlDeleteBarang)) {
                 pstmt.setString(1, idSupplier);
                 pstmt.executeUpdate();
             }
 
-            // 6. Hapus PEMBELIAN yang terkait dengan supplier ini
             String sqlDeletePembelian = "DELETE FROM PEMBELIAN WHERE ID_SUPLIER = ?";
             try (PreparedStatement pstmt = conn.prepareStatement(sqlDeletePembelian)) {
                 pstmt.setString(1, idSupplier);
                 pstmt.executeUpdate();
             }
 
-            // 7. Hapus TRANSAKSI yang terkait dengan supplier ini
             String sqlDeleteTransaksi = "DELETE FROM TRANSAKSI WHERE ID_SUPLIER = ?";
             try (PreparedStatement pstmt = conn.prepareStatement(sqlDeleteTransaksi)) {
                 pstmt.setString(1, idSupplier);
                 pstmt.executeUpdate();
             }
 
-            // 8. Terakhir, hapus SUPLIER induk
             String sqlDeleteSupplier = "DELETE FROM SUPLIER WHERE ID_SUPLIER = ?";
             try (PreparedStatement pstmt = conn.prepareStatement(sqlDeleteSupplier)) {
                 pstmt.setString(1, idSupplier);
                 pstmt.executeUpdate();
             }
 
-            conn.commit(); // Komit transaksi jika semua berhasil
+            conn.commit();
         } catch (SQLException e) {
             if (conn != null) {
                 try {
-                    conn.rollback(); // Rollback jika ada error
+                    conn.rollback();
                 } catch (SQLException rbEx) {
                     System.err.println("Gagal melakukan rollback: " + rbEx.getMessage());
                 }
             }
-            throw e; // Lemparkan exception agar controller tahu ada masalah
+            throw e;
         } finally {
             if (conn != null) {
                 try {
-                    conn.setAutoCommit(true); // Kembalikan auto-commit
-                    conn.close(); // Tutup koneksi
+                    conn.setAutoCommit(true);
+                    conn.close();
                 } catch (SQLException closeEx) {
                     System.err.println("Gagal menutup koneksi database: " + closeEx.getMessage());
                 }
             }
         }
     }
-    // --- AKHIR DARI METODE deleteSupplier() YANG DIPERBAIKI ---
-
 }

@@ -4,34 +4,29 @@ import com.example.tokokelontong.model.Pembelian;
 import com.example.tokokelontong.model.DetailPembelian;
 import com.example.tokokelontong.database.DBUtil;
 import java.sql.*;
-import java.time.LocalDate;
+import java.time.LocalDate; // Import LocalDate
 import java.util.List;
-import java.math.BigDecimal;
+import java.math.BigDecimal; // <<< PASTIKAN INI DIIMPORT, KARENA MENGGUNAKAN BIGDECIMAL
 
 public class PembelianDAO {
 
     public String savePembelianTransaction(Pembelian pembelian, List<DetailPembelian> detailItems) throws SQLException {
         String generatedPembelianId = null;
 
-        // SQL INSERT untuk PEMBELIAN (ID_PEMBELIAN akan digenerate trigger)
         String sqlPembelian = "INSERT INTO PEMBELIAN (TANGGAL, ID_SUPLIER, TOTAL) VALUES (?, ?, ?)";
-
-        // SQL INSERT untuk DETAIL_PEMBELIAN (ID_DETAIL akan digenerate trigger)
-        // KARENA ID_DETAIL DIGENERASI TRIGGER DAN TIDAK DIAMBIL DI JAVA, KITA TIDAK MINTA GENERATED KEYS UNTUKNYA
         String sqlDetail = "INSERT INTO DETAIL_PEMBELIAN (ID_PEMBELIAN, KODE_BARANG, JUMLAH, HARGA_BELI, SUBTOTAL) VALUES (?, ?, ?, ?, ?)";
-
         String sqlUpdateStok = "UPDATE BARANG SET STOK = STOK + ? WHERE KODE_BARANG = ?";
 
         Connection conn = null;
         try {
             conn = DBUtil.getConnection();
-            conn.setAutoCommit(false);
+            conn.setAutoCommit(false); // Mulai transaksi
 
-            // 1. Insert Pembelian (Parent)
+            // 1. Insert Pembelian (Parent) - MENGAMBIL ID YANG DIHASILKAN DB
             try (PreparedStatement psPembelian = conn.prepareStatement(sqlPembelian, new String[]{"ID_PEMBELIAN"})) {
                 psPembelian.setDate(1, Date.valueOf(pembelian.getTanggal()));
                 psPembelian.setString(2, pembelian.getIdSuplier());
-                psPembelian.setBigDecimal(3, pembelian.getTotal());
+                psPembelian.setBigDecimal(3, pembelian.getTotal()); // <<< MENGGUNAKAN setBigDecimal()
 
                 psPembelian.executeUpdate();
 
@@ -51,21 +46,16 @@ public class PembelianDAO {
             }
 
             // 2. Insert Detail Pembelian (Child) dan Update Stok Barang
-            // Perbaikan utama di sini: psDetail tidak lagi meminta generated keys
-            try (PreparedStatement psDetail = conn.prepareStatement(sqlDetail); // <<< PERBAIKAN: Hapus new String[]{"ID_DETAIL"}
+            try (PreparedStatement psDetail = conn.prepareStatement(sqlDetail);
                  PreparedStatement psStok = conn.prepareStatement(sqlUpdateStok)) {
                 for (DetailPembelian detail : detailItems) {
-                    // ID_DETAIL akan digenerate oleh trigger, tidak perlu diset dari Java
-                    // Parameter JDBC sekarang diatur ulang karena tidak ada ID_DETAIL yang diset di indeks 1
-                    // Urutan parameter sesuai dengan kolom di sqlDetail (ID_PEMBELIAN, KODE_BARANG, JUMLAH, HARGA_BELI, SUBTOTAL)
+                    psDetail.setString(1, generatedPembelianId);
+                    psDetail.setString(2, detail.getKodeBarang());
+                    psDetail.setInt(3, detail.getJumlah());
+                    psDetail.setBigDecimal(4, detail.getHargaBeli()); // <<< MENGGUNAKAN setBigDecimal()
+                    psDetail.setBigDecimal(5, detail.getSubtotal());  // <<< MENGGUNAKAN setBigDecimal()
 
-                    psDetail.setString(1, generatedPembelianId); // Parameter 1: ID_PEMBELIAN (dari induk)
-                    psDetail.setString(2, detail.getKodeBarang()); // Parameter 2: KODE_BARANG
-                    psDetail.setInt(3, detail.getJumlah());       // Parameter 3: JUMLAH
-                    psDetail.setBigDecimal(4, detail.getHargaBeli()); // Parameter 4: HARGA_BELI
-                    psDetail.setBigDecimal(5, detail.getSubtotal());  // Parameter 5: SUBTOTAL
-
-                    psDetail.addBatch(); // <<< Baris 72 Anda. Sekarang seharusnya tidak NullPointerException.
+                    psDetail.addBatch();
                     System.out.println("DEBUG: Adding DETAIL_PEMBELIAN for KODE_BARANG: " + detail.getKodeBarang() + " with ID_PEMBELIAN: " + generatedPembelianId);
 
                     // Untuk update stok BARANG
