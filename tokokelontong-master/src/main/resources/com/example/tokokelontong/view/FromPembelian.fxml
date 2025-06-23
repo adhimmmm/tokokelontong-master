@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.tokokelontong.controller.FromPembelianController">
+    <VBox spacing="10" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0">
+        <HBox spacing="10" style="-fx-padding: 20; -fx-background-color: linear-gradient(to right, #667eea, #764ba2);">
+            <Label text="Manajemen Pembelian" style="-fx-text-fill: white; -fx-font-size: 24px; -fx-font-weight: bold;" />
+        </HBox>
+        <HBox spacing="10" style="-fx-padding: 10;">
+            <Label text="Tanggal:"/>
+            <DatePicker fx:id="dpTanggal"/>
+            <Label text="Suplier:"/>
+            <ComboBox fx:id="cbSuplier" prefWidth="200"/>
+        </HBox>
+
+        <HBox spacing="10" style="-fx-padding: 0 10 10 10;">
+            <Label text="Barang:"/>
+            <ComboBox fx:id="cbBarang" prefWidth="200"/>
+            <Label text="Harga Beli:"/>
+            <TextField fx:id="tfHargaBeli" prefWidth="120"/>
+            <Label text="Jumlah:"/>
+            <TextField fx:id="tfJumlah" prefWidth="80"/>
+            <Button text="Tambah" onAction="#onTambah" fx:id="btnTambah"/>
+        </HBox>
+
+        <TableView fx:id="tableDetail" prefHeight="200" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colKodeBarang" text="Kode Barang" prefWidth="90"/>
+                <TableColumn fx:id="colNamaBarang" text="Nama Barang" prefWidth="150"/>
+                <TableColumn fx:id="colJumlah" text="Jumlah" prefWidth="70"/>
+                <TableColumn fx:id="colHarga" text="Harga Beli" prefWidth="100"/>
+                <TableColumn fx:id="colSubtotal" text="Subtotal" prefWidth="120"/>
+
+                <TableColumn fx:id="colTanggalPembelian" text="Tgl. Beli" prefWidth="90"/> </columns>
+        </TableView>
+
+        <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 10;">
+            <Label text="Total:"/>
+            <Label fx:id="lblTotal" text="Rp 0.00" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+        </HBox>
+
+        <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 10;">
+            <Button text="Simpan Pembelian" fx:id="btnSimpan" onAction="#onSimpan"/>
+        </HBox>
+    </VBox>
+</AnchorPane>

@@ -38,6 +38,10 @@ public class AdminPanelController {
         loadView("/com/example/tokokelontong/view/DashboardView.fxml");
     }
 
+    public void loadFormPembelianView() {
+        loadView("/com/example/tokokelontong/view/FromPembelian.fxml");
+    }
+
     public void logout() {
         System.exit(0);
     }

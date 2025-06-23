@@ -2,6 +2,10 @@ module com.example.tokokelontong {
     requires javafx.controls;
     requires javafx.fxml;
     requires java.sql;
+    requires jasperreports;
+    requires itextpdf;
+    requires kernel;
+    requires layout;
 
     // INI HARUS ADA untuk FXML bisa akses field private di controller
     opens com.example.tokokelontong.controller to javafx.fxml;

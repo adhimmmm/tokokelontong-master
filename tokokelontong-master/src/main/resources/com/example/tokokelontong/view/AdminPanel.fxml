@@ -30,6 +30,7 @@
                 <Button text="🚚 Manajemen Supplier" onAction="#loadSupplierView" styleClass="side-button"/>
                 <Button text="🧾 Transaksi" onAction="#loadTransaksiView" styleClass="side-button"/>
                 <Button text="📊 Laporan" onAction="#loadLaporanView" styleClass="side-button"/>
+                <Button text="📊 Laporan T" onAction="#loadFormPembelianView" styleClass="side-button"/>
             </VBox>
 
             <VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS" spacing="10">

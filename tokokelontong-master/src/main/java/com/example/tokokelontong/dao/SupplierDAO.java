@@ -59,14 +59,105 @@ public class SupplierDAO {
     }
 
 
-    public static void deleteSupplier(String id) throws SQLException {
-        String sql = "DELETE FROM SUPLIER WHERE ID_SUPPLIER = ?";
+    // --- METODE deleteSupplier() YANG DIPERBAIKI DENGAN CASCADING DELETE ---
+    // Metode ini akan menghapus data dari tabel anak terdalam terlebih dahulu.
+    public static void deleteSupplier(String idSupplier) throws SQLException {
+        Connection conn = null;
+        try {
+            conn = DBUtil.getConnection();
+            conn.setAutoCommit(false); // Mulai transaksi
 
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, id);
-            stmt.executeUpdate();
+            // Urutan penghapusan harus dari anak paling dalam ke induk:
+
+            // 1. Hapus DETAIL_PEMBELIAN yang terkait dengan PEMBELIAN dari supplier ini
+            String sqlDeleteDetailPembelianByPembelian = """
+                DELETE FROM DETAIL_PEMBELIAN
+                WHERE ID_PEMBELIAN IN (SELECT ID_PEMBELIAN FROM PEMBELIAN WHERE ID_SUPLIER = ?)
+            """;
+            try (PreparedStatement pstmt = conn.prepareStatement(sqlDeleteDetailPembelianByPembelian)) {
+                pstmt.setString(1, idSupplier);
+                pstmt.executeUpdate();
+            }
+
+            // 2. Hapus DETAIL_TRANSAKSI yang terkait dengan TRANSAKSI dari supplier ini
+            String sqlDeleteDetailTransaksiByTransaksi = """
+                DELETE FROM DETAIL_TRANSAKSI
+                WHERE TRANSAKSI_ID_TRANSAKSI IN (SELECT ID_TRANSAKSI FROM TRANSAKSI WHERE ID_SUPLIER = ?)
+            """;
+            try (PreparedStatement pstmt = conn.prepareStatement(sqlDeleteDetailTransaksiByTransaksi)) {
+                pstmt.setString(1, idSupplier);
+                pstmt.executeUpdate();
+            }
+
+            // 3. Hapus PEMBAYARAN yang terkait dengan TRANSAKSI dari supplier ini
+            String sqlDeletePembayaranByTransaksi = """
+                DELETE FROM PEMBAYARAN
+                WHERE TRANSAKSI_ID_TRANSAKSI IN (SELECT ID_TRANSAKSI FROM TRANSAKSI WHERE ID_SUPLIER = ?)
+            """;
+            try (PreparedStatement pstmt = conn.prepareStatement(sqlDeletePembayaranByTransaksi)) {
+                pstmt.setString(1, idSupplier);
+                pstmt.executeUpdate();
+            }
+
+            // 4. Hapus STRUK yang terkait dengan TRANSAKSI dari supplier ini (BARU DITAMBAHKAN)
+            String sqlDeleteStrukByTransaksi = """
+                DELETE FROM STRUK
+                WHERE ID_TRANSAKSI IN (SELECT ID_TRANSAKSI FROM TRANSAKSI WHERE ID_SUPLIER = ?)
+            """;
+            try (PreparedStatement pstmt = conn.prepareStatement(sqlDeleteStrukByTransaksi)) {
+                pstmt.setString(1, idSupplier);
+                pstmt.executeUpdate();
+            }
+
+            // 5. Hapus BARANG yang disuplai oleh supplier ini
+            String sqlDeleteBarang = "DELETE FROM BARANG WHERE SUPLIER_ID_SUPLIER = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(sqlDeleteBarang)) {
+                pstmt.setString(1, idSupplier);
+                pstmt.executeUpdate();
+            }
+
+            // 6. Hapus PEMBELIAN yang terkait dengan supplier ini
+            String sqlDeletePembelian = "DELETE FROM PEMBELIAN WHERE ID_SUPLIER = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(sqlDeletePembelian)) {
+                pstmt.setString(1, idSupplier);
+                pstmt.executeUpdate();
+            }
+
+            // 7. Hapus TRANSAKSI yang terkait dengan supplier ini
+            String sqlDeleteTransaksi = "DELETE FROM TRANSAKSI WHERE ID_SUPLIER = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(sqlDeleteTransaksi)) {
+                pstmt.setString(1, idSupplier);
+                pstmt.executeUpdate();
+            }
+
+            // 8. Terakhir, hapus SUPLIER induk
+            String sqlDeleteSupplier = "DELETE FROM SUPLIER WHERE ID_SUPLIER = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(sqlDeleteSupplier)) {
+                pstmt.setString(1, idSupplier);
+                pstmt.executeUpdate();
+            }
+
+            conn.commit(); // Komit transaksi jika semua berhasil
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback(); // Rollback jika ada error
+                } catch (SQLException rbEx) {
+                    System.err.println("Gagal melakukan rollback: " + rbEx.getMessage());
+                }
+            }
+            throw e; // Lemparkan exception agar controller tahu ada masalah
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true); // Kembalikan auto-commit
+                    conn.close(); // Tutup koneksi
+                } catch (SQLException closeEx) {
+                    System.err.println("Gagal menutup koneksi database: " + closeEx.getMessage());
+                }
+            }
         }
     }
+    // --- AKHIR DARI METODE deleteSupplier() YANG DIPERBAIKI ---
 
 }

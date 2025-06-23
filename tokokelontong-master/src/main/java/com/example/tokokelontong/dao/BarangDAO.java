@@ -68,12 +68,53 @@ public class BarangDAO {
         }
     }
 
+    // --- METODE deleteBarang() YANG DIPERBAIKI DENGAN CASCADING DELETE ---
     public void deleteBarang(String kodeBarang) throws SQLException {
-        String sql = "DELETE FROM barang WHERE kode_barang = ?";
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, kodeBarang);
-            stmt.executeUpdate();
+        Connection conn = null;
+        try {
+            conn = DBUtil.getConnection();
+            conn.setAutoCommit(false); // Mulai transaksi
+
+            // 1. Hapus dari DETAIL_PEMBELIAN yang merujuk barang ini
+            String sqlDeleteDetailPembelian = "DELETE FROM DETAIL_PEMBELIAN WHERE KODE_BARANG = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(sqlDeleteDetailPembelian)) {
+                pstmt.setString(1, kodeBarang);
+                pstmt.executeUpdate();
+            }
+
+            // 2. Hapus dari DETAIL_TRANSAKSI yang merujuk barang ini
+            String sqlDeleteDetailTransaksi = "DELETE FROM DETAIL_TRANSAKSI WHERE BARANG_KODE_BARANG = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(sqlDeleteDetailTransaksi)) {
+                pstmt.setString(1, kodeBarang);
+                pstmt.executeUpdate();
+            }
+
+            // 3. Terakhir, hapus BARANG induk
+            String sqlDeleteBarang = "DELETE FROM BARANG WHERE KODE_BARANG = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(sqlDeleteBarang)) {
+                pstmt.setString(1, kodeBarang);
+                pstmt.executeUpdate();
+            }
+
+            conn.commit(); // Komit transaksi jika semua berhasil
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback(); // Rollback jika ada error
+                } catch (SQLException rbEx) {
+                    System.err.println("Gagal melakukan rollback: " + rbEx.getMessage());
+                }
+            }
+            throw e; // Lemparkan exception agar controller tahu ada masalah
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true); // Kembalikan auto-commit
+                    conn.close(); // Tutup koneksi
+                } catch (SQLException closeEx) {
+                    System.err.println("Gagal menutup koneksi database: " + closeEx.getMessage());
+                }
+            }
         }
     }
 }

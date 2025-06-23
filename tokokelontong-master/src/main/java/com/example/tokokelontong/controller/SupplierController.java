@@ -129,8 +129,35 @@ public class SupplierController {
         }
     }
 
+    // Di dalam controller Anda (misal: SupplierController.java)
+
     private void showError(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR, message, ButtonType.OK);
+        Alert alert = new Alert(Alert.AlertType.ERROR); // Buat alert tipe ERROR
+        alert.setTitle("Error"); // Judul kotak dialog
+        alert.setHeaderText(null); // Tidak perlu header text
+
+        // Membuat TextArea untuk menampung pesan error, agar bisa menampilkan pesan panjang
+        TextArea textArea = new TextArea(message);
+        textArea.setEditable(false); // Tidak bisa diedit
+        textArea.setWrapText(true); // Membungkus teks jika terlalu panjang
+
+        // Mengatur ukuran preferensi untuk TextArea
+        // Sesuaikan prefWidth dan prefHeight sesuai kebutuhan Anda
+        textArea.setPrefWidth(400);
+        textArea.setPrefHeight(150);
+
+        // Menetapkan TextArea sebagai konten dari DialogPane alert
+        alert.getDialogPane().setContent(textArea);
+
+        // Membuat alert bisa diubah ukurannya
+        alert.setResizable(true);
+
+        // Mengatur ukuran preferensi untuk keseluruhan DialogPane (opsional, bisa membantu)
+        alert.getDialogPane().setPrefSize(450, 250); // Sesuaikan lebar, tinggi keseluruhan dialog
+
+        // Menambahkan tombol OK
+        alert.getButtonTypes().setAll(ButtonType.OK);
+
         alert.showAndWait();
     }
 
