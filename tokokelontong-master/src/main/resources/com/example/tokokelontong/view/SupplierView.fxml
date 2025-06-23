@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.tokokelontong.controller.SupplierController">
+    <top>
+        <VBox spacing="10">
+            <HBox spacing="10" style="-fx-padding: 20; -fx-background-color: linear-gradient(to right, #667eea, #764ba2);">
+                <Label text="Manajemen Supplier" style="-fx-text-fill: white; -fx-font-size: 24px; -fx-font-weight: bold;" />
+            </HBox>
+
+            <!-- Tambahan fitur pencarian -->
+            <HBox spacing="10" style="-fx-padding: 0 20 10 20;">
+                <Label text="Cari Supplier:" />
+                <TextField fx:id="searchField" promptText="Masukkan nama atau ID supplier" prefWidth="300" />
+                <Button text="Cari" onAction="#handleCariSupplier" />
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="15" style="-fx-padding: 20;">
+            <TableView fx:id="supplierTable" prefHeight="300">
+                <columns>
+                    <TableColumn text="ID Supplier" fx:id="idSupplierColumn" prefWidth="100" />
+                    <TableColumn text="Nama Supplier" fx:id="namaSupplierColumn" prefWidth="200" />
+                    <TableColumn text="Alamat" fx:id="alamatColumn" prefWidth="250" />
+                    <TableColumn text="No. Telepon" fx:id="noTeleponColumn" prefWidth="150" />
+                    <TableColumn text="Nama Barang" fx:id="namaBarangColumn" prefWidth="150" />
+                </columns>
+            </TableView>
+
+            <HBox spacing="10">
+                <Button text="Tambah" onAction="#handleTambahSupplier" style="-fx-background-color: #5cb85c; -fx-text-fill: white;" />
+                <Button text="Edit" onAction="#handleUpdateSupplier" style="-fx-background-color: #f0ad4e; -fx-text-fill: white;" />
+                <Button text="Hapus" onAction="#handleHapusSupplier" style="-fx-background-color: #d9534f; -fx-text-fill: white;" />
+                <Region fx:id="spacer" HBox.hgrow="ALWAYS" />
+                <Button text="Refresh" onAction="#handleResetForm" />
+            </HBox>
+
+            <GridPane hgap="10" vgap="10" style="-fx-padding: 10;">
+                <Label text="Nama Supplier:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="namaSupplierField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <Label text="Alamat:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <TextField fx:id="alamatField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                <Label text="No. Telepon:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                <TextField fx:id="noTeleponField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                <Label text="Nama Barang:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                <TextField fx:id="namaBarangField" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+            </GridPane>
+        </VBox>
+    </center>
+</BorderPane>

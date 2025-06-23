@@ -1,0 +1,140 @@
+/* --- General Colors and Fonts --- */
+/*
+ * Defining a few common colors and font sizes here helps maintain consistency
+ * and makes it easier to change themes later.
+ */
+.root {
+    -fx-font-family: "Arial", sans-serif; /* A common, clean font */
+    -fx-base-text-fill: #1f2937; /* Default text color for general elements */
+}
+
+/* --- Sidebar Styles --- */
+.sidebar {
+    -fx-background-color: #1f2937; /* Dark background for the sidebar */
+    -fx-padding: 20;
+    -fx-pref-width: 220;
+}
+
+.sidebar-menu {
+    -fx-padding: 10 0 0 0; /* Padding specifically for the menu within the sidebar */
+}
+
+/* Styles for all side buttons (including logout for base styles) */
+.side-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #e5e7eb; /* Light text for regular buttons */
+    -fx-font-size: 14px;
+    -fx-pref-width: 180px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 10 15 10 15;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.side-button:hover {
+    -fx-background-color: #374151; /* Darker background on hover */
+}
+
+.logout-button {
+    -fx-text-fill: #f87171; /* Red text for the logout button */
+}
+
+.sidebar-separator {
+    -fx-background-color: #4b5563; /* Color for the separator line */
+    -fx-padding: 0 10 0 10;
+}
+
+/* --- Main Content Area Styles --- */
+.main-content {
+    -fx-background-color: #f9fafb; /* Light background for the main content area */
+    -fx-padding: 20; /* Consistent padding for the content area */
+}
+
+/* --- Header Styles --- */
+.header {
+    -fx-padding: 15;
+    -fx-background-color: #2C3E50; /* Dark blue background for the header */
+    -fx-alignment: center-left;
+}
+
+.dashboard-title {
+    -fx-text-fill: white;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+/* --- Dashboard Card Styles --- */
+/*
+ * Combined the various dashboard-card styles. The more specific
+ * `dashboard-card` with the `dropshadow` is chosen as the primary
+ * and enhanced with desirable properties from the others.
+ */
+.dashboard-card {
+    -fx-background-color: #ffffff; /* White background for cards */
+    -fx-padding: 20;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 6, 0, 0, 2); /* Subtle shadow for depth */
+    -fx-pref-width: 170; /* Adjusted width based on the more defined card */
+    -fx-pref-height: 100;
+    -fx-alignment: center;
+    -fx-spacing: 10;
+}
+
+/* Common label for dashboard cards */
+.dashboard-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #6b7280; /* Muted text color for labels */
+}
+
+/* Common value display for dashboard cards */
+.dashboard-value {
+    -fx-font-size: 24px; /* Larger font for values */
+    -fx-font-weight: bold;
+    -fx-text-fill: #111827; /* Darker text for values */
+}
+
+/* --- Section Title Styles --- */
+/*
+ * Combined dashboard-section-title and section-title as they serve the same purpose.
+ * The more detailed `dashboard-section-title` was used as the base.
+ */
+.section-title {
+    -fx-font-size: 18px; /* Slightly larger for main sections */
+    -fx-font-weight: bold;
+    -fx-padding: 10 0 10 0; /* Top and bottom padding */
+    -fx-text-fill: #1f2937; /* Dark text for titles */
+}
+
+/* --- Dashboard Table Styles --- */
+.dashboard-table {
+    -fx-background-radius: 8;
+    -fx-border-color: #ccc;
+    -fx-border-radius: 8;
+}
+
+/* --- Card Styles (for the more general ".card" if distinct from dashboard cards) --- */
+/*
+ * This ".card" style is kept separate because it uses different colors and shadow,
+ * suggesting it might be for a different type of card than the ".dashboard-card".
+ * If they are meant to be the same, combine them into one.
+ */
+.card {
+    -fx-background-color: #ecf0f1; /* Lighter background */
+    -fx-padding: 15;
+    -fx-alignment: center;
+    -fx-pref-width: 180;
+    -fx-pref-height: 100;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0.3, 0, 2); /* Different shadow effect */
+}
+
+.card-title {
+    -fx-font-size: 14px;
+    -fx-text-fill: #34495E;
+}
+
+.card-value {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2C3E50;
+}

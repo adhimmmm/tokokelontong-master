@@ -1,0 +1,52 @@
+/* Atur background dan padding */
+.root {
+    -fx-background-color: #f4f6f8;
+    -fx-padding: 20px;
+    -fx-font-family: "Segoe UI", sans-serif;
+}
+
+/* Label kategori (judul kecil) */
+.label {
+    -fx-text-fill: #555;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+/* Label nilai summary (angka besar) */
+.label-value {
+    -fx-text-fill: #2e7d32; /* hijau gelap */
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+/* VBox untuk tiap kotak ringkasan */
+.summary-box {
+    -fx-background-color: #ffffff;
+    -fx-padding: 15px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 4, 0, 2, 2);
+    -fx-min-width: 180px;
+    -fx-alignment: center;
+}
+
+/* Judul chart */
+.chart-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+}
+
+/* Grafik BarChart dan LineChart */
+.chart {
+    -fx-background-color: #ffffff;
+    -fx-padding: 15px;
+    -fx-background-radius: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 4, 0, 2, 2);
+}
+
+/* X dan Y Axis label */
+.axis-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #666;
+}

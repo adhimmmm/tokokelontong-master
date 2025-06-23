@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.tokokelontong.controller.AdminPanelController"
+            stylesheets="@../css/style.css">
+
+    <left>
+        <VBox spacing="20" styleClass="sidebar">
+            <!-- Logo -->
+            <HBox alignment="CENTER">
+<!--                <ImageView fitHeight="60" fitWidth="60">-->
+<!--                    <image>-->
+<!--                        <Image url="@../images/logo.jpeg"/>-->
+<!--                    </image>-->
+<!--                </ImageView>-->
+            </HBox>
+
+            <Separator styleClass="sidebar-separator"/>
+
+            <!-- Sidebar Buttons -->
+            <VBox spacing="10" alignment="TOP_CENTER" styleClass="sidebar-menu">
+                <Button text="🏠 Dashboard" onAction="#loadDashboardView" styleClass="side-button"/>
+                <Button text="📦 Manajemen Barang" onAction="#loadBarangView" styleClass="side-button"/>
+                <Button text="👨‍💼 Manajemen Pegawai" onAction="#loadPegawaiView" styleClass="side-button"/>
+                <Button text="🚚 Manajemen Supplier" onAction="#loadSupplierView" styleClass="side-button"/>
+                <Button text="🧾 Transaksi" onAction="#loadTransaksiView" styleClass="side-button"/>
+                <Button text="📊 Laporan" onAction="#loadLaporanView" styleClass="side-button"/>
+            </VBox>
+
+            <VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS" spacing="10">
+                <Separator styleClass="sidebar-separator"/>
+                <Button text="🔓 Keluar" onAction="#logout" styleClass="side-button logout-button"/>
+            </VBox>
+        </VBox>
+    </left>
+
+    <center>
+        <StackPane fx:id="contentPane" styleClass="main-content"/>
+    </center>
+</BorderPane>
